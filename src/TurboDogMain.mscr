@@ -1,0 +1,58 @@
+Include("utils.mscr")
+
+Global( logFileName )
+Global( logEnabled )
+
+logFileName = @GetPath(IniRead( "navi.ini", "path", "handler" )) \ "turbodog.log"
+logEnabled = IniRead( "navi.ini", "config", "logEnabled" )
+
+@CloseComAgent()
+Sleep(500)
+
+gps = IniRead( "navi.ini", "gps", "origin" )
+@Log("com origin:" & gps)
+If("PC" ne MortScriptType())
+	SetComInfo( gps, 1000 , 7200 )
+EndIf
+data = ReadFile( gps, 100 )
+@Log("gpsorigin:" & data)
+
+file = IniRead( "navi.ini", "path", "comAgent" )
+@Log("file: " & file)
+inifile = Replace(file, ".exe", ".ini")
+@Log("inifile: " & inifile)
+baud = IniRead(inifile, "Main", "ComBaud") 
+@Log("baud : " & baud )
+if(baud ne "7200")
+  @Log("fix comAgent GUI save bug")
+  IniWrite( Replace(file, ".exe", ".ini"), "Main", "ComBaud", "7200" )
+  @Log("fixed")
+endif
+
+@Run(file) 
+Sleep(5000)
+
+gps = IniRead( "navi.ini", "gps", "changed" )
+@Log("com origin:" & gps )
+If("PC" ne MortScriptType())
+	SetComInfo( gps, 1000 , 7200 )
+EndIf
+
+data = ReadFile( gps, 100 )
+@Log("gpschanged:" & data)
+
+file = IniRead( "navi.ini", "path", "handler" )
+@Run(file) 
+
+file = IniRead( "navi.ini", "navi1", "path" )
+file = @GetPath( file ) & "SystemSet.in_"
+port = SubStr( gps, 4, 1)
+portIni = IniRead(file, "GPS", "ComPort")
+@Log("GPS/ComPort changed:" & port & " inifile:" & portIni )
+if(port ne portIni)
+	@Log("fix GPS/ComPort " & gps)
+	IniWrite( file, "GPS", "ComPort", port )
+	@Log("done")
+endif
+
+Exit

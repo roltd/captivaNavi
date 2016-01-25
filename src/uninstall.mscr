@@ -1,0 +1,37 @@
+Include("utils.mscr")
+
+Global( logFileName )
+Global( logEnabled )
+logFileName = "uninstall.log"
+logEnabled = IniRead( "navi.ini", "config", "logEnabled" )
+
+RunWait(SystemPath("ScriptPath") \ "killAll.exe")
+
+path = IniRead( "navi.ini", "navi1", "path" )
+originFolder = @GetPath( path )
+
+@Delete(originFolder & "MortScript.exe" )
+@Delete(originFolder & "TurboDog.mscr" )
+#@Delete(originFolder & "navi.ini" )
+#@Delete(originFolder & "utils.mscr" )
+#@Rename(originFolder & "turbodog.log", SystemPath("ScriptPath") \ "turbodog.log")
+
+pathOrig = @CreateOrigPath(path)
+If( FileExists( pathOrig ) )
+	@Delete( path )
+	@Rename( pathOrig, path )
+Else
+	@Log("backup not found: " & pathOrig )
+EndIf
+
+path =  @GetPath( path ) & "SystemSet.in_"
+pathOrig = @CreateOrigPath(path)
+If( FileExists( pathOrig ) )
+	@Delete( path )
+	@Rename( pathOrig, path )
+Else
+	@Log("backup not found: " & pathOrig )
+EndIf
+
+Message("Uninstalled!")
+Exit

@@ -1,0 +1,24 @@
+Include("utils.mscr")
+
+Global( logFileName )
+Global( logEnabled )
+logFileName = "killAll.log"
+logEnabled = IniRead( "navi.ini", "config", "logEnabled" )
+
+file = Replace(@GetProcessName( IniRead( "navi.ini", "path", "handler" )), "exe" , "mscr" )
+@Log("kill " & file )
+KillScript(file) 
+@Log("kill done")
+
+file = @GetProcessName( @CreateOrigPath( IniRead( "navi.ini", "navi1", "path" ) ))
+@Log("kill " & file )
+Kill(file) 
+@Log("kill done")
+
+@CloseComAgent()
+file = @GetProcessName( IniRead( "navi.ini", "path", "comAgent" ) )
+@Log("kill " & file )
+Kill(file) 
+@Log("kill done")
+
+Exit

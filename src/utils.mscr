@@ -1,0 +1,97 @@
+Sub Copy( path, newPath )
+	@Log("copy: " & path & " to " & newPath)
+	If ( FileExists( path ) )
+		If ( not FileExists( newPath ) )
+			Copy( path , newPath, FALSE )
+			@Log("copy done")
+			Return(TRUE)
+		else 
+			@Log("file exists: " & newPath)
+			Return(FALSE)
+		EndIf
+	else 
+		@Log("file not found: " & path)
+		Return(FALSE)
+	EndIf
+EndSub
+
+Sub Rename( path, newPath )
+	@Log("rename: " & path & " to " & newPath)
+	If ( not FileExists( newPath ) )
+		if( FileExists( path ))
+			Rename( path , newPath, FALSE )
+			@Log("rename done")
+			Return(TRUE)
+		else
+			@Log("file not found: " & path )
+		EndIf
+	else 
+		@Log("file exists: " & newPath)
+		Return(FALSE)
+	EndIf
+EndSub
+
+Sub Delete( path)
+	@Log("delete: " & path)
+	If ( FileExists( path ) )
+		Delete( path )
+		@Log("delete done")
+		Return(TRUE)
+	else 
+		@Log("file not found: " & path)
+		Return(FALSE)
+	EndIf
+EndSub
+
+Sub Run( path )
+	@Log("run: " & path)
+	If( NOT FileExists(path) )
+		@Log("file not found: " & path)
+		ExitSub(FALSE)
+	EndIf
+
+	If( ProcExists( @GetProcessName(path)) )
+		@Log("process found: " & path)
+		ExitSub(FALSE)
+	EndIf
+
+	Run( path ) 
+	@Log("started")
+	Return(TRUE)
+EndSub
+
+Sub CreateOrigPath( path )
+	Return( Replace( path , ".", "_orig." ))
+EndSub
+
+
+Sub GetPath( path )
+	Return( SubStr( path , 1, ReverseFind(path, '\')))
+EndSub
+
+Sub Log ( text )
+	If( "true" eq ToLower(logEnabled) )
+		WriteFile( logFileName, FormatTime( "H:i:s - " ) & text & "^NL^", True)
+		CloseFile( logFileName )
+	EndIf
+EndSub
+
+Sub GetProcessName ( text )
+	index = ReverseFind( text, "\" )
+	If ( index > 0 )
+		Return( ToLower(SubStr( text, index + 1)) )
+	Else
+		Return( ToLower(text) )
+	EndIf
+EndSub
+
+Sub CloseComAgent()
+	title = IniRead( "navi.ini", "title", "comAgent" )
+	if(WndExists(title))
+		Close (title)
+		@Log("comagent window closed")
+	else 
+		@Log("comagent window not found")
+	Endif
+	Sleep(100)
+EndSub
