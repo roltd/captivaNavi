@@ -12,9 +12,6 @@ originFolder = @GetPath( path )
 
 @Delete(originFolder & "MortScript.exe" )
 @Delete(originFolder & "TurboDog.mscr" )
-#@Delete(originFolder & "navi.ini" )
-#@Delete(originFolder & "utils.mscr" )
-#@Rename(originFolder & "turbodog.log", SystemPath("ScriptPath") \ "turbodog.log")
 
 pathOrig = @CreateOrigPath(path)
 If( FileExists( pathOrig ) )

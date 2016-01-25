@@ -14,14 +14,9 @@ pathOrig = @CreateOrigPath(path)
 path = @GetPath( path ) & "SystemSet.in_"
 pathOrig = @CreateOrigPath(path)
 @Copy(path , pathOrig)
-#@Log("fix GPS/ComPort")
-#IniWrite( path, "GPS", "ComPort", 4 )
-#@Log("done")
 
 @Copy(SystemPath("ScriptPath") \ "MortScript.exe" , originFolder & "MortScript.exe" )
 @Copy(SystemPath("ScriptPath") \ "TurboDog.exe" , originFolder & "TurboDog.exe" )
 @Copy(SystemPath("ScriptPath") \ "TurboDog.mscr" , originFolder & "TurboDog.mscr" )
-#@Copy(SystemPath("ScriptPath") \ "navi.ini" , originFolder & "navi.ini" )
-#@Copy(SystemPath("ScriptPath") \ "utils.mscr" , originFolder & "utils.mscr" )
 
 Message("Installed!")

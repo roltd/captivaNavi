@@ -1,6 +1,6 @@
 path = "\Storage Card\scripts\"
 If("PC" eq MortScriptType())
-	path = "f:\scripts\x86\"
+	path = "f:\"
 EndIf
 
 path = path & "TurboDogMain.mscr"
@@ -12,5 +12,4 @@ else
 	path = SystemPath("ScriptPath") \ "SystemSet.in_"
 	IniWrite( path, "GPS", "ComPort", port )
 EndIf
-
 RunWait(SystemPath("ScriptPath") \"TurboDog_orig.exe") 
