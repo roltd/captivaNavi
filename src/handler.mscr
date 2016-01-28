@@ -46,6 +46,13 @@ while ((handlerTimeout <= 0) || ((TimeStamp() - timeout) < handlerTimeout ) )
 				@RunOrActivate( originProc )
 			Default
 				IniWrite( "navi.ini", "config", "selected", index )
+				procWindow = @FindProcWindow( @GetProcessName(originProc) )
+				If( procWindow ne 0 ) 
+				    menuX = IniRead( "navi.ini", "navi1", "menu.x" )
+				    menuY = IniRead( "navi.ini", "navi1", "menu.y" )
+				    MouseClick( procWindow, menuX, menuY )
+				    Sleep(50)
+				EndIf
 				@RunOrActivate( naviPath [ index ])
 			EndSwitch
 		EndIf
