@@ -1,0 +1,31 @@
+fileName = "reg.dat"
+
+Message(" start")
+
+@Dump(HKCU, "")
+@Dump(HKLM, "")
+@Dump(HKUS, "")
+
+Message(" stop ")
+
+exit
+
+Sub Dump( globalkey, parent )
+#    Message(globalkey & " - " & parent)
+    foreach key in regsubkeys(globalkey, parent)
+	newParent = ""
+	if (parent ne "")
+	  newParent = parent & "\"
+	endif
+	WriteFile( fileName, "^NL^[" & globalkey & "\" & newParent & key & "]^NL^", True)
+	foreach value, date in regValues(globalkey, newParent & key)
+	  WriteFile( fileName, value & "=" & date & "^NL^", True)
+	endforeach
+	@Dump(globalkey, newParent & key)
+    endforeach
+    CloseFile( fileName )
+EndSub
+
+
+
+
