@@ -95,3 +95,73 @@ Sub CloseComAgent()
 	Endif
 	Sleep(100)
 EndSub
+
+Sub InitNaviArray()
+  ForEach section in iniSections("navi.ini")
+    If( Find(section, "navi") > 0)
+      index = 0 + CharAt( section, 5)
+      naviName[index] = IniRead( "navi.ini", section, "name" )
+      naviPath[index] = IniRead( "navi.ini", section, "path" )
+    EndIf
+  EndForEach
+EndSub
+
+Sub FindProcWindow( proc )
+	windows = FindWindows( "")
+	@Log( "Window " & Join(windows , " ") )
+	For i = 1 to ElementCount(windows)
+		@Log(windows [i] & " - " & WindowProcess( windows [i])))
+		If( ToLower(@GetProcessName(proc)) eq ToLower(WindowProcess( windows [i] )) )
+			@Log("found " & windows [i] & " - " & pro)
+			ExitSub(windows [i])
+		EndIf
+	Next
+	@Log("not found window for " & proc)
+	Return(0)
+EndSub
+
+Sub RunOrActivate( proc )
+	If( ProcExists( @GetProcessName( proc ) ) )
+		procWindow = @FindProcWindow( @GetProcessName(proc) )
+		If( procWindow ne 0 ) 
+			@Log("found window " & procWindow & "for " & proc)
+			@ActivateWindow( procWindow )
+			ExitSub()
+		EndIf
+	EndIf
+	Run( proc )
+EndSub
+
+Sub ActivateWindow( title )
+	@Log("ActivateWindow " & title)
+	WaitFor(title, 1)
+	Repeat(5)
+		Show(title)
+		Sleep(200)
+		active = ActiveWindow()
+		If(title ne active)
+			Minimize(active)
+		else
+			ExitSub()
+		EndIf
+	EndRepeat
+EndSub
+
+Sub SearchCustomNavi()
+#@Log( "!naviPath count: " & MaxIndex(naviPath) )
+  For j = 2 to MaxIndex(naviPath)
+    @Log( "search for " & j & " - " & naviPath[j] )
+    procWindow = @FindProcWindow( @GetProcessName( naviPath[j] ) )
+    If( procWindow ne 0 ) 
+      @Log( "custom navi found " & procWindow )
+      ExitSub(procWindow)
+    EndIf
+  Next
+  Return(0)
+EndSub
+
+Sub GotoOriginMenu( originWindow )
+    menuX = IniRead( "navi.ini", "navi1", "menu.x" )
+    menuY = IniRead( "navi.ini", "navi1", "menu.y" )
+    MouseClick( originWindow, menuX, menuY )
+EndSub

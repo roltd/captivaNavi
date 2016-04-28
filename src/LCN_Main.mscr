@@ -1,0 +1,13 @@
+#message("start")
+run("\Storage Card\Upgrade\WolfComAgent\WolfComAgent.exe")
+
+Sleep(1000)
+
+SetComInfo( "COM5:", 100 , 7200)
+data = ReadFile( "COM5:", 10)
+CloseFile("COM5:")
+
+run("\Storage Card\LCN_Main.exe")
+run("\Storage Card\Upgrade\WolfQuickIcon\WolfQuickIcon.exe")
+run("\Storage Card\Upgrade\handler.exe")
+

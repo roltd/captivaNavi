@@ -1,0 +1,66 @@
+Include("utils.mscr")
+
+Global( logFileName )
+Global( logEnabled )
+logFileName = "naviMenu.log"
+logEnabled = IniRead( "navi.ini", "config", "logEnabled" )
+
+Global(naviName)
+Global(naviPath)
+@InitNaviArray()
+
+debug = "true" eq ToLower(IniRead( "navi.ini", "debug", "debug" ))
+
+#originProc = @GetProcessName(naviPath[1])
+#originWindow = @FindProcWindow( @GetProcessName(originProc) )
+#@ActivateWindow(originWindow)
+
+If( ActiveWindow() ne "TurboDog") 
+  @OpenTurboDog()
+EndIf
+
+customNaviWindow = @SearchCustomNavi()
+@Log("customNaviWindow " & customNaviWindow)
+
+If( customNaviWindow eq 0 ) 
+  SetChoiceEntryFormat( 50, 40 )
+  if(MaxIndex(naviPath) > 2)
+    text = Join(naviName, "|")
+    menu = Split(SubStr(text, Find(text, "|") + 1), "|")
+    choice = Choice( "Select navi","Navi", 1, 3, menu )
+  endif
+  Switch( choice )
+    Case( 0 )
+      If(debug)
+	@DebugMenu()
+      EndIf
+    Default
+      @GotoOriginMenu( "TurboDog" )
+      @RunOrActivate( naviPath [ choice + 1 ])
+  EndSwitch
+EndIf
+exit 
+
+Sub OpenTurboDog
+  MouseClick("CID_GUI", 770 ,10)
+  Sleep(500)
+  MouseClick("CID_GUI", 770 ,10)
+  Sleep(500)
+  MouseClick("CID_GUI", 100 ,100)
+  Sleep(300)
+EndSub
+
+Sub DebugMenu
+  Sleep(500)
+  taskManager = IniRead( "navi.ini", "debug", "taskManager" )
+  total = IniRead( "navi.ini", "debug", "total" )
+
+  Switch( Choice( "Debug","Debug", index, selectTimeout, "ITaskMgr", "Total") )
+  Case( 0 )
+  Case( 1 )
+    @RunOrActivate( taskManager )
+  Case( 2 )
+    @RunOrActivate( total )
+  EndSwitch
+EndSub
+

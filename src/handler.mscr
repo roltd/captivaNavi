@@ -1,130 +1,42 @@
 Include("utils.mscr")
 
-Global( logFileName )
-Global( logEnabled )
+Global(logFileName )
+Global(logEnabled )
 Global(naviName)
 Global(naviPath)
-Global(selectTimeout)
 
 debug = "true" eq ToLower(IniRead( "navi.ini", "debug", "debug" ))
 
 logFileName = "handler.log"
 logEnabled = IniRead( "navi.ini", "config", "logEnabled" )
-selectTimeout = 0 + IniRead( "navi.ini", "config", "selectTimeout" )
 handlerTimeout = 0 + IniRead( "navi.ini", "config", "handlerTimeout" )
-ForEach section in iniSections("navi.ini")
-	If( Find(section, "navi") > 0)
-		index = 0 + CharAt( section, 5)
-		naviName[index] = IniRead( "navi.ini", section, "name" )
-		naviPath[index] = IniRead( "navi.ini", section, "path" )
-	EndIf
-EndForEach
+
+@InitNaviArray()
 
 # main loop
 timeout = TimeStamp()
 lastActiveProc = ToLower(ActiveProcess())
 while ((handlerTimeout <= 0) || ((TimeStamp() - timeout) < handlerTimeout ) )
-	activeProc = ToLower(ActiveProcess())
-#	@Log( "Proc " & Join(ProcList(FALSE), " ") )
-#	@Log( "Window " & Join(FindWindows( "", ANYWHERE, no, no, yes), " ") )
-#	@Log( "Window " & Join(FindWindows( ""), " ") )
-#	@Log( "Active last: " & lastActiveProc & " cur: " & activeProc & ";" & ActiveWindow() )
-	if( lastActiveProc ne activeProc )
-		@Log( "last changed: " & lastActiveProc & " cur: " & activeProc & ";" & ActiveWindow() )
-		lastActiveProc = activeProc
-		originProc = @GetProcessName(@CreateOrigPath(naviPath[1]))
-		If ( Find(activeProc, originProc) > 0 )
-			@Log("navi call found")
-			index = @SelectNavi( IniRead( "navi.ini", "config", "selected" ) )
-			Switch( index )
-			Case( 0 )
-				If(debug)
-					@DebugMenu()
-				EndIf
-			Case( 1 )
-				IniWrite( "navi.ini", "config", "selected", index )
-				@RunOrActivate( originProc )
-			Default
-				IniWrite( "navi.ini", "config", "selected", index )
-				procWindow = @FindProcWindow( @GetProcessName(originProc) )
-				If( procWindow ne 0 ) 
-				    menuX = IniRead( "navi.ini", "navi1", "menu.x" )
-				    menuY = IniRead( "navi.ini", "navi1", "menu.y" )
-				    MouseClick( procWindow, menuX, menuY )
-				    Sleep(50)
-				EndIf
-				@RunOrActivate( naviPath [ index ])
-			EndSwitch
-		EndIf
+  activeProc = ToLower(ActiveProcess())
+  if( lastActiveProc ne activeProc )
+    @Log( "last changed: " & lastActiveProc & " cur: " & activeProc & ";" & ActiveWindow() )
+    lastActiveProc = activeProc
+    originProc = @GetProcessName(naviPath[1])
+    @Log( " activeProc: " & activeProc )
+    @Log( " originProc: " & originProc )
+    If ( Find(activeProc, originProc) > 0 )
+      @Log("navi call found")
+      customNaviWindow = @SearchCustomNavi()
+      @Log("customNaviWindow " & customNaviWindow)
+      If( customNaviWindow ne 0 ) 
+	originWindow = @FindProcWindow( @GetProcessName(originProc) )
+	If( originWindow ne 0 ) 
+	  @GotoOriginMenu( originWindow )
 	EndIf
-	Sleep(500)
+	@ActivateWindow( customNaviWindow )
+      EndIf
+    EndIf
+  EndIf
+  Sleep(50)
 EndWhile
 Exit
-
-Sub DebugMenu
-	Sleep(500)
-	taskManager = IniRead( "navi.ini", "debug", "taskManager" )
-	total = IniRead( "navi.ini", "debug", "total" )
-
-	Switch( Choice( "Debug","Debug", index, selectTimeout, "ITaskMgr", "Total", "KillAll") )
-	Case( 0 )
-	Case( 1 )
-		@RunOrActivate( taskManager )
-	Case( 2 )
-		@RunOrActivate( total )
-	Case( 3 )
-		RunWait(SystemPath("ScriptPath") \ "killAll.exe")
-	EndSwitch
-EndSub
-
-Sub FindProcWindow( proc )
-	windows = FindWindows( "")
-	@Log( "Window " & Join(windows , " ") )
-	For i = 1 to ElementCount(windows)
-		@Log(windows [i] & " - " & WindowProcess( windows [i])))
-		If( ToLower(@GetProcessName(proc)) eq ToLower(WindowProcess( windows [i] )) )
-			@Log("found " & windows [i] & " - " & pro)
-			ExitSub(windows [i])
-		EndIf
-	Next
-	@Log("not found window for " & proc)
-	Return(0)
-EndSub
-
-Sub RunOrActivate( proc )
-	If( ProcExists( @GetProcessName( proc ) ) )
-		procWindow = @FindProcWindow( @GetProcessName(proc) )
-		If( procWindow ne 0 ) 
-			@Log("found window " & procWindow & "for " & proc)
-			@ActivateWindow( procWindow )
-			ExitSub()
-		EndIf
-	EndIf
-	Run( proc )
-EndSub
-
-Sub SelectNavi( index )
-	SetChoiceEntryFormat( 50, 40 )
-	@Log("show choice default: " & index)
-	Return( Choice( "Select navi","Navi", index, selectTimeout, naviName ) )
-EndSub
-
-Sub IsActive( proc )
-	@Log( ActiveProcess() & " active")
-	Return( Find( ToLower(ActiveProcess()), @GetProcessName(proc) ) > 0 )
-EndSub
-
-Sub ActivateWindow( title )
-	@Log("ActivateWindow " & title)
-	WaitFor(title, 1)
-	Repeat(5)
-		Show(title)
-		Sleep(300)
-		active = ActiveWindow()
-		If(title ne active)
-			Minimize(active)
-		else
-			ExitSub()
-		EndIf
-	EndRepeat
-EndSub
